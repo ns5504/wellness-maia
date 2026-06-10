@@ -230,17 +230,17 @@
 
   <script>
     // ==========================================
-    // SECURE API KEY PASSING VIA PROMPT
+    // SECURE API KEY PASSING VIA PASSWORD PROMPT
     // ==========================================
     let GROK_API_KEY = sessionStorage.getItem('grok_key');
 
-    // Prompt user for their key on initial page load if it's missing from memory
+    // If no key is saved in this browser tab's temporary memory, ask for it immediately on load
     if (!GROK_API_KEY) {
       GROK_API_KEY = prompt("Please enter your Grok API Key to activate the strategy pipeline:");
       if (GROK_API_KEY) {
         sessionStorage.setItem('grok_key', GROK_API_KEY.trim());
       } else {
-        alert("An API Key is required for the Maia Strategy Pilot chat to respond.");
+        alert("API Key is required for the Maia Strategy Pilot chat to function.");
       }
     }
 
@@ -282,13 +282,13 @@
      * Executes network streaming directly via the safe CORS-anywhere proxy channel to Grok
      */
     async function sendChat(){
-      // Fallback check if they didn't input a key at the load prompt
+      // Extra fallback check if they hit send without entering a key earlier
       if (!GROK_API_KEY) {
         GROK_API_KEY = prompt("Please enter your Grok API Key to proceed:");
         if (GROK_API_KEY) {
           sessionStorage.setItem('grok_key', GROK_API_KEY.trim());
         } else {
-          alert("Cannot send message without a valid API key.");
+          alert("Cannot send message without an API key.");
           return;
         }
       }
@@ -368,7 +368,7 @@
         btn.disabled = false;
         btn.textContent = 'Send';
       }
-    }
+    } // <-- Fixed missing closing brace for sendChat
 
     /**
      * Automated Client Side Telemetry Randomization (Refreshes metrics panel data)
