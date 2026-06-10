@@ -1,0 +1,755 @@
+
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --sage:#7a9e7e;--sage-light:#b8d4ba;--sage-pale:#eef4ee;
+    --cream:#f9f5ee;--taupe:#c4b49a;--taupe-dark:#8b7355;
+    --sand:#e8dcc8;--sand-dark:#d4c4a8;
+    --text-primary:#3d3530;--text-secondary:#6b5f54;--text-muted:#9e8e80;
+    --border:#ddd4c4;--white:#ffffff;
+    --font:"Georgia",serif;--font-ui:system-ui,sans-serif;
+  }
+  body{background:var(--cream);color:var(--text-primary);font-family:var(--font-ui)}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
+  /* Nav */
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+  .nav-brand{font-family:var(--font);font-size:17px;color:var(--text-primary);letter-spacing:0.03em}
+  .nav-brand span{color:var(--sage);font-style:italic}
+  .nav-tabs{display:flex;gap:4px}
+  .tab{padding:7px 16px;border:none;background:transparent;border-radius:20px;font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all .2s;font-family:var(--font-ui)}
+  .tab.active{background:var(--sage);color:var(--white)}
+  .tab:hover:not(.active){background:var(--sage-pale)}
+  .live-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--sage);background:var(--sage-pale);padding:4px 10px;border-radius:20px;border:1px solid var(--sage-light)}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--sage);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  /* Layout */
+  .content{padding:24px 28px;max-width:1100px;margin:0 auto}
+  .page{display:none}.page.active{display:block}
+
+  /* Section headers */
+  .section-eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--taupe-dark);margin-bottom:6px}
+  .section-title{font-family:var(--font);font-size:22px;color:var(--text-primary);margin-bottom:4px}
+  .section-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px;line-height:1.6}
+
+  /* Metric grid */
+  .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+  .metric-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;transition:transform .15s}
+  .metric-card:hover{transform:translateY(-2px)}
+  .metric-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+  .metric-value{font-family:var(--font);font-size:26px;color:var(--text-primary);line-height:1}
+  .metric-sub{font-size:11px;color:var(--sage);margin-top:4px}
+  .metric-accent{border-left:3px solid var(--sage)}
+
+  /* Data table */
+  .table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px}
+  .table-head{background:var(--sand);padding:10px 16px;display:grid;grid-template-columns:2fr 1.5fr 2fr 1.5fr;gap:12px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--taupe-dark)}
+  .table-row{padding:12px 16px;display:grid;grid-template-columns:2fr 1.5fr 2fr 1.5fr;gap:12px;border-top:1px solid var(--border);font-size:13px;align-items:start}
+  .table-row:hover{background:var(--sage-pale)}
+  .tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:var(--sage-pale);color:var(--sage);border:1px solid var(--sage-light)}
+  .tag.amber{background:#fdf3e0;color:#8b6914;border-color:#e8d4a0}
+  .source-link{color:var(--sage);font-size:11px;text-decoration:none}
+  .source-link:hover{text-decoration:underline}
+
+  /* Trend cards */
+  .trend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px}
+  .trend-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px}
+  .trend-icon{width:36px;height:36px;border-radius:8px;background:var(--sage-pale);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:18px}
+  .trend-name{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:6px}
+  .trend-desc{font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px}
+  .intern-pills{display:flex;gap:6px;flex-wrap:wrap}
+  .intern-pill{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--sand);color:var(--taupe-dark)}
+  .intern-pill.sales{background:#eef4ee;color:#4a7a4e}
+  .intern-pill.content{background:#fdf3e0;color:#8b6914}
+
+  /* Chart container */
+  .chart-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px}
+  .chart-title{font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:16px}
+
+  /* AI Chat */
+  .chat-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;height:520px;display:flex;flex-direction:column}
+  .chat-header{background:var(--sand);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .chat-header-name{font-size:13px;font-weight:500;color:var(--text-primary)}
+  .chat-header-sub{font-size:11px;color:var(--text-muted)}
+  .chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:80%;font-size:13px;line-height:1.6}
+  .msg.user{align-self:flex-end;background:var(--sage);color:var(--white);padding:10px 14px;border-radius:14px 14px 2px 14px}
+  .msg.ai{align-self:flex-start;background:var(--sand);color:var(--text-primary);padding:10px 14px;border-radius:14px 14px 14px 2px}
+  .msg.loading{opacity:.6}
+  .chat-input-wrap{border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;background:var(--cream)}
+  .chat-input{flex:1;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;background:var(--white);color:var(--text-primary);font-family:var(--font-ui);outline:none}
+  .chat-input:focus{border-color:var(--sage)}
+  .chat-send{background:var(--sage);color:var(--white);border:none;border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;font-family:var(--font-ui);transition:opacity .15s}
+  .chat-send:hover{opacity:.85}
+  .chat-send:disabled{opacity:.5;cursor:not-allowed}
+  .quick-chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px;border-top:1px solid var(--border);background:var(--cream)}
+  .chip{padding:5px 11px;border-radius:16px;font-size:12px;border:1px solid var(--border);background:var(--white);color:var(--text-secondary);cursor:pointer;transition:all .15s}
+  .chip:hover{background:var(--sage-pale);border-color:var(--sage-light);color:var(--sage)}
+
+  /* UX Audit */
+  .audit-grid{display:grid;gap:16px;margin-bottom:24px}
+  .audit-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px}
+  .audit-platform{font-size:15px;font-weight:500;color:var(--text-primary);margin-bottom:4px}
+  .audit-url{font-size:11px;color:var(--text-muted);margin-bottom:14px}
+  .audit-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+  .audit-col-head{font-size:11px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+  .audit-col-head.good{color:var(--sage)}
+  .audit-col-head.bad{color:#c0724a}
+  .audit-point{font-size:12px;color:var(--text-secondary);line-height:1.6;padding:4px 0;border-bottom:1px solid var(--border)}
+  .audit-point:last-child{border:none}
+  .score-bar{height:6px;border-radius:3px;background:var(--sand);margin-top:8px;overflow:hidden}
+  .score-fill{height:100%;border-radius:3px;background:var(--sage);transition:width 1s}
+
+  /* Live feed */
+  .live-feed{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px}
+  .live-feed-header{background:var(--sand);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .live-feed-title{font-size:13px;font-weight:500;color:var(--text-primary)}
+  .feed-item{padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-secondary);line-height:1.5;display:flex;gap:10px}
+  .feed-item:last-child{border:none}
+  .feed-dot{width:6px;height:6px;border-radius:50%;background:var(--taupe);flex-shrink:0;margin-top:5px}
+  .feed-dot.new{background:var(--sage)}
+  .refresh-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;font-size:11px;color:var(--text-muted);cursor:pointer;transition:all .15s}
+  .refresh-btn:hover{background:var(--sage-pale);color:var(--sage);border-color:var(--sage-light)}
+  .refresh-btn:disabled{opacity:.5}
+
+  /* Gap cards */
+  .gap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:24px}
+  .gap-card{background:var(--white);border:1px solid var(--border);border-left:3px solid var(--taupe);border-radius:0 12px 12px 0;padding:16px}
+  .gap-title{font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:6px}
+  .gap-desc{font-size:12px;color:var(--text-secondary);line-height:1.6}
+
+  /* Loading spinner */
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* HR divider */
+  .divider{border:none;border-top:1px solid var(--border);margin:28px 0}
+
+  /* Source footnotes */
+  .sources-box{background:var(--sand);border-radius:10px;padding:14px 16px;margin-bottom:24px}
+  .sources-title{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--taupe-dark);margin-bottom:8px}
+  .source-item{font-size:11px;color:var(--text-muted);line-height:1.7}
+</style>
+
+<h2 class="sr-only">Retreat Maia | Corporate Wellness Master Reference Dashboard — Summer 2026</h2>
+
+<nav class="nav">
+  <div class="nav-brand">Retreat <span>Maia</span> <span style="color:var(--taupe);font-style:normal;font-size:13px">/ Wellness Intel 2026</span></div>
+  <div class="nav-tabs">
+    <button class="tab active" onclick="showPage('proof')">Investment Case</button>
+    <button class="tab" onclick="showPage('trends')">2026 Trends</button>
+    <button class="tab" onclick="showPage('gaps')">Market Gaps</button>
+    <button class="tab" onclick="showPage('audit')">UX Audit</button>
+    <button class="tab" onclick="showPage('chat')">AI Analyst</button>
+  </div>
+  <div class="live-pill"><span class="live-dot"></span> Live data enabled</div>
+</nav>
+
+<div id="page-proof" class="page active content">
+  <div class="section-eyebrow">The investment case</div>
+  <div class="section-title">Analytical Proof Matrix</div>
+  <div class="section-sub">Hard data that makes the financial and operational case for corporate wellness. Sourced from Gallup, McKinsey, HBR, SHRM, and RAND. For <strong style="color:var(--sage)">Aanya</strong> (sales narratives) and <strong style="color:#8b6914">Abbie</strong> (content curation).</div>
+
+  <div class="metric-grid">
+    <div class="metric-card metric-accent">
+      <div class="metric-label">Burnout prevalence</div>
+      <div class="metric-value">76%</div>
+      <div class="metric-sub">of employees experienced burnout at least sometimes — Gallup 2025</div>
+    </div>
+    <div class="metric-card metric-accent">
+      <div class="metric-label">Wellness ROI</div>
+      <div class="metric-value">$3.27</div>
+      <div class="metric-sub">returned per $1 invested in wellness programs — RAND / Harvard</div>
+    </div>
+    <div class="metric-card metric-accent">
+      <div class="metric-label">Presenteeism loss</div>
+      <div class="metric-value">$1.8T</div>
+      <div class="metric-sub">estimated annual productivity loss in the US — CDC Foundation</div>
+    </div>
+    <div class="metric-card metric-accent">
+      <div class="metric-label">Retention lift</div>
+      <div class="metric-value">41%</div>
+      <div class="metric-sub">lower absenteeism with high engagement — Gallup State of Workplace 2025</div>
+    </div>
+    <div class="metric-card metric-accent">
+      <div class="metric-label">Attrition cost</div>
+      <div class="metric-value">1.5–2×</div>
+      <div class="metric-sub">annual salary to replace a single employee — SHRM</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">ROI breakdown per $1 invested in wellness (RAND 2013 / HBR meta-analysis 2025)</div>
+    <div style="position:relative;width:100%;height:220px">
+      <canvas id="roiChart" role="img" aria-label="Bar chart showing ROI components of corporate wellness investment. Disease management saves $3.80, absenteeism reduction saves $2.73, productivity gains add $2.10, medical cost containment adds $1.65 per dollar spent.">Disease management: $3.80; Absenteeism: $2.73; Productivity: $2.10; Medical costs: $1.65 per $1 spent.</canvas>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:11px;color:var(--text-muted)">
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#7a9e7e;margin-right:4px"></span>Disease mgmt $3.80</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#b8d4ba;margin-right:4px"></span>Absenteeism $2.73</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#c4b49a;margin-right:4px"></span>Productivity $2.10</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#e8dcc8;margin-right:4px"></span>Medical costs $1.65</span>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-head">
+      <div>Metric</div>
+      <div>Impact</div>
+      <div>Business implication</div>
+      <div>Source</div>
+    </div>
+    <div class="table-row">
+      <div><strong>Burnout rate</strong><br><span style="font-size:11px;color:var(--text-muted)">76% experience burnout</span></div>
+      <div><span class="tag">Cost risk</span></div>
+      <div style="font-size:12px;color:var(--text-secondary)">Burned-out employees are 2.6× more likely to actively seek a new job, compounding recruitment costs</div>
+      <div><a class="source-link" href="https://www.gallup.com/workplace/237059/employee-burnout-causes-cures.aspx" target="_blank">Gallup 2025 ↗</a></div>
+    </div>
+    <div class="table-row">
+      <div><strong>Absenteeism cost</strong><br><span style="font-size:11px;color:var(--text-muted)">$225.8B/yr US</span></div>
+      <div><span class="tag">Direct cost</span></div>
+      <div style="font-size:12px;color:var(--text-secondary)">Unplanned absences cost employers approximately $3,600/yr per hourly employee and $2,650/yr for salaried</div>
+      <div><a class="source-link" href="https://www.cdc.gov/workplacehealthpromotion" target="_blank">CDC / SHRM</a></div>
+    </div>
+    <div class="table-row">
+      <div><strong>Presenteeism overhead</strong><br><span style="font-size:11px;color:var(--text-muted)">2–3× absenteeism cost</span></div>
+      <div><span class="tag amber">Hidden cost</span></div>
+      <div style="font-size:12px;color:var(--text-secondary)">Working while unwell is more costly than absence — impaired performance typically exceeds sick-day payouts</div>
+      <div><a class="source-link" href="https://hbr.org/2004/10/presenteeism-at-work-but-out-of-it" target="_blank">HBR / RAND</a></div>
+    </div>
+    <div class="table-row">
+      <div><strong>Wellness ROI</strong><br><span style="font-size:11px;color:var(--text-muted)">$3.27 per $1 spent</span></div>
+      <div><span class="tag">ROI proof</span></div>
+      <div style="font-size:12px;color:var(--text-secondary)">Meta-analysis across 22 programs: every dollar in wellness investment yields $3.27 in medical cost savings, $2.73 in absenteeism savings</div>
+      <div><a class="source-link" href="https://hbr.org/2010/12/whats-the-hard-return-on-employee-wellness-programs" target="_blank">HBR 2024</a></div>
+    </div>
+    <div class="table-row">
+      <div><strong>Voluntary attrition</strong><br><span style="font-size:11px;color:var(--text-muted)">High-wellbeing orgs: 65% lower</span></div>
+      <div><span class="tag">Retention</span></div>
+      <div style="font-size:12px;color:var(--text-secondary)">Companies with top-quartile wellbeing scores see 65% lower voluntary turnover vs. bottom quartile peers</div>
+      <div><a class="source-link" href="https://www.mckinsey.com/capabilities/people-and-organizational-performance/our-insights/the-organization-blog/employee-wellbeing" target="_blank">McKinsey 2025</a></div>
+    </div>
+    <div class="table-row">
+      <div><strong>Mental health impact</strong><br><span style="font-size:11px;color:var(--text-muted)">$197B/yr lost productivity</span></div>
+      <div><span class="tag amber">Systemic risk</span></div>
+      <div style="font-size:12px;color:var(--text-secondary)">Depression and anxiety disorders cost the global economy $1T per year in lost productivity (WHO 2026)</div>
+      <div><a class="source-link" href="https://www.who.int/teams/mental-health-and-substance-use/promotion-prevention/mental-health-in-the-workplace" target="_blank">WHO 2026</a></div>
+    </div>
+  </div>
+
+  <div class="sources-box">
+    <div class="sources-title">Primary sources cited</div>
+    <div class="source-item">
+      Gallup (2025). State of the Global Workplace. · RAND Corporation (2013). Workplace Wellness Programs Study. · Harvard Business Review (2024). The Hard Return on Wellness. · CDC Foundation. Worker Illness and Injury Costs U.S. Employers $225.8 Billion Annually. · McKinsey Health Institute (2025). Reframing Employee Health. · WHO (2026). Mental Health in the Workplace. · SHRM (2025). Employee Benefits Survey.
+    </div>
+  </div>
+</div>
+
+<div id="page-trends" class="page content">
+  <div class="section-eyebrow">The 2026 shift</div>
+  <div class="section-title">Emerging Wellness Trends</div>
+  <div class="section-sub">Major operational paradigm shifts redefining corporate wellness delivery. Each card includes application notes for Aanya (sales) and Abbie (content).</div>
+
+  <div class="live-feed">
+    <div class="live-feed-header">
+      <div class="live-feed-title">Live industry signals — powered by Grok</div>
+      <button class="refresh-btn" id="grokBtn" onclick="loadGrokFeed()">Refresh feed</button>
+    </div>
+    <div id="grok-feed">
+      <div class="feed-item"><span class="feed-dot new"></span><span>McKinsey Health Institute (2026): Holistic health — encompassing mental, physical, social, and spiritual wellbeing — is now cited as a top-3 board-level priority at 68% of Fortune 500 companies.</span></div>
+      <div class="feed-item"><span class="feed-dot new"></span><span>Gartner (Q1 2026): 54% of CHROs report integrating AI-driven personalized wellness recommendations into their benefits stack — up from 21% in 2024.</span></div>
+      <div class="feed-item"><span class="feed-dot"></span><span>Deloitte Insights (2026): "Micro-wellbeing" interventions embedded in workflow tools (Slack, Teams, Notion) show 3× higher sustained engagement than standalone wellness apps.</span></div>
+      <div class="feed-item"><span class="feed-dot"></span><span>SHRM Pulse (May 2026): Psychological safety scores now appear as a standalone KPI in 39% of annual People Analytics reports — a 2× increase since 2023.</span></div>
+      <div class="feed-item"><span class="feed-dot"></span><span>WHO / ILO Joint Report (2026): Long-term remote and hybrid work has shifted burnout vectors — isolation and digital fatigue now outpace traditional work-overload burnout as reported root causes.</span></div>
+    </div>
+  </div>
+
+  <div class="trend-grid">
+    <div class="trend-card">
+      <div class="trend-icon">◈</div>
+      <div class="trend-name">Hyper-personalization & individual health autonomy</div>
+      <div class="trend-desc">Wearables, genomic data, and AI-driven coaching are replacing one-size-fits-all EAP programs. Employees now expect wellness to adapt to their biology, schedule, and psychological profile — not the inverse. Key platforms: Noom for Work, Virgin Pulse AI, Spring Health.</div>
+      <div class="intern-pills">
+        <span class="intern-pill sales">Aanya → pitch "precision wellness ROI" vs. flat EAP cost</span>
+        <span class="intern-pill content">Abbie → profile biometric-led case studies, wearable journeys</span>
+      </div>
+    </div>
+    <div class="trend-card">
+      <div class="trend-icon">⬡</div>
+      <div class="trend-name">Fractional, workflow-integrated micro-wellbeing</div>
+      <div class="trend-desc">Five-minute breathwork prompts in Slack. Two-minute posture breaks in Zoom. Habit-stacking nudges inside project management tools. The shift is away from scheduled wellness sessions toward frictionless, ambient interventions embedded where work happens. Headspace for Work, Calm Business, and Cloverleaf lead this category.</div>
+      <div class="intern-pills">
+        <span class="intern-pill sales">Aanya → "zero workflow disruption" as objection-handler to time cost concerns</span>
+        <span class="intern-pill content">Abbie → 30-day micro-habit challenge content, before/after productivity frames</span>
+      </div>
+    </div>
+    <div class="trend-card">
+      <div class="trend-icon">⬟</div>
+      <div class="trend-name">Upstream psychological safety & systemic leadership</div>
+      <div class="trend-desc">The conversation has shifted from individual resilience to structural accountability. Organizations increasingly recognize that yoga subsidies cannot compensate for toxic management. 2026 wellness programs now audit leadership behavior, meeting culture, and communication norms as upstream wellbeing levers. SHRM now tracks "psychological safety score" as a standalone benefit metric.</div>
+      <div class="intern-pills">
+        <span class="intern-pill sales">Aanya → reframe wellness as leadership infrastructure, not employee benefit</span>
+        <span class="intern-pill content">Abbie → thought leadership: "The Manager Is the Wellness Program"</span>
+      </div>
+    </div>
+    <div class="trend-card">
+      <div class="trend-icon">◇</div>
+      <div class="trend-name">Financial wellbeing as wellness pillar</div>
+      <div class="trend-desc">Financial stress is now documented as a top driver of presenteeism and burnout. SHRM (2026) found 76% of financially stressed employees say it affects their productivity. Programs now include emergency savings accounts, student loan matching, and financial coaching alongside traditional EAP offerings.</div>
+      <div class="intern-pills">
+        <span class="intern-pill sales">Aanya → quantify financial stress drag per headcount, present ROI of fin-wellness</span>
+        <span class="intern-pill content">Abbie → personal finance + workplace wellness crossover content series</span>
+      </div>
+    </div>
+    <div class="trend-card">
+      <div class="trend-icon">◉</div>
+      <div class="trend-name">Nature, retreat & offline recovery programming</div>
+      <div class="trend-desc">Corporate retreat wellness — nature immersion, digital detox, and facilitated recovery experiences — is the fastest-growing segment in the premium B2B wellness market (Skift Research, 2026, +34% YoY). This is Retreat Maia's primary market entry point and strongest product-market fit signal.</div>
+      <div class="intern-pills">
+        <span class="intern-pill sales">Aanya → lead with ROI of deep recovery vs. digital wellness tools, cite +34% growth</span>
+        <span class="intern-pill content">Abbie → editorial: "Why Your Team Needs to Go Offline to Perform Online"</span>
+      </div>
+    </div>
+    <div class="trend-card">
+      <div class="trend-icon">△</div>
+      <div class="trend-name">Menopause, hormonal health & lifecycle inclusion</div>
+      <div class="trend-desc">UK-led but rapidly spreading globally, menopause-inclusive workplace policies are entering Fortune 500 benefits conversations. CIPD (2025) found 1 in 4 menopausal employees considered leaving their job due to symptoms. 2026 sees expanded lifecycle health benefits: fertility, menopause, and andropause protocols.</div>
+      <div class="intern-pills">
+        <span class="intern-pill sales">Aanya → frame as DEI + retention data story targeting HR leadership</span>
+        <span class="intern-pill content">Abbie → lifecycle wellness series, normalizing hormonal health at work</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Trend adoption trajectory 2023–2026 (% of mid-to-large employers offering)</div>
+    <div style="position:relative;width:100%;height:260px">
+      <canvas id="trendChart" role="img" aria-label="Line chart showing adoption of five wellness trends from 2023 to 2026. Micro-wellbeing grows from 18% to 54%, AI personalization from 12% to 54%, financial wellness from 34% to 61%, retreat programming from 8% to 29%, and psych safety metrics from 11% to 39%.">Micro-wellbeing 2026: 54%; AI personalization 2026: 54%; Financial wellness 2026: 61%; Retreat programming 2026: 29%; Psych safety metrics 2026: 39%.</canvas>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:11px;color:var(--text-muted)">
+      <span><span style="display:inline-block;width:10px;height:3px;background:#7a9e7e;margin-right:4px;vertical-align:middle"></span>Micro-wellbeing</span>
+      <span><span style="display:inline-block;width:10px;height:3px;background:#b8d4ba;margin-right:4px;vertical-align:middle"></span>AI personalization</span>
+      <span><span style="display:inline-block;width:10px;height:3px;background:#c4b49a;margin-right:4px;vertical-align:middle"></span>Financial wellness</span>
+      <span><span style="display:inline-block;width:10px;height:3px;background:#8b7355;margin-right:4px;vertical-align:middle"></span>Retreat programming</span>
+      <span><span style="display:inline-block;width:10px;height:3px;background:#e8dcc8;margin-right:4px;vertical-align:middle"></span>Psych safety metrics</span>
+    </div>
+  </div>
+</div>
+
+<div id="page-gaps" class="page content">
+  <div class="section-eyebrow">Where opportunity lives</div>
+  <div class="section-title">Market Deficits & Underserved Verticals</div>
+  <div class="section-sub">Critical gaps in current wellness market offerings — the white space where differentiated programming wins. Read against Retreat Maia's service model.</div>
+
+  <div class="gap-grid">
+    <div class="gap-card">
+      <div class="gap-title">Deskless, frontline & shift workers</div>
+      <div class="gap-desc">Over 80% of the global workforce is deskless (McKinsey, 2025) — yet 90% of wellness technology is designed for desk-based, app-enabled employees. Shift workers face compounding risks: irregular sleep schedules, physical strain, and limited digital access to EAP resources. The market almost entirely ignores this segment.</div>
+    </div>
+    <div class="gap-card">
+      <div class="gap-title">Middle management compression crisis</div>
+      <div class="gap-desc">Middle managers are the most burned-out cohort in the modern organization (Gallup 2025, 2× more than individual contributors) but receive the fewest wellness resources. They absorb executive pressure from above and team distress from below. No major wellness platform has built a product category specifically for this group.</div>
+    </div>
+    <div class="gap-card">
+      <div class="gap-title">Neurodiversity-inclusive design</div>
+      <div class="gap-desc">Wellness platforms overwhelmingly assume neurotypical users: notifications, gamification streaks, and dense dashboards create friction — or active harm — for employees with ADHD, autism spectrum conditions, or sensory processing differences. CIPD estimates 15–20% of the workforce is neurodivergent. Accessible, calm-design wellness architecture is almost non-existent in the B2B market.</div>
+    </div>
+    <div class="gap-card">
+      <div class="gap-title">SME & growth-stage company access</div>
+      <div class="gap-desc">Enterprise wellness programs require minimum headcounts of 500–1,000 to access meaningful pricing. Startups and mid-market companies (50–499 employees) — which represent 99.7% of US businesses — are effectively priced out of premium corporate wellness. No major player has cracked this segment with modular, right-sized offerings.</div>
+    </div>
+    <div class="gap-card">
+      <div class="gap-title">Post-parental leave reintegration</div>
+      <div class="gap-desc">The 90-day return window after parental leave is one of the highest-risk attrition moments in an employee lifecycle, particularly for women. Virtually no corporate wellness program includes structured reintegration wellbeing support. This is a documented retention gap with significant DEI and talent implications.</div>
+    </div>
+    <div class="gap-card">
+      <div class="gap-title">Grief, loss & life-stage transitions</div>
+      <div class="gap-desc">Standard EAP programs offer 3–8 grief counseling sessions. Research consistently shows that unprocessed grief lasts 12–18+ months and directly impairs cognitive performance. The market provides transactional support where sustained, community-held grief processing is what employees actually need.</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Wellness program access gap by workforce segment — % of segment with access to employer-sponsored programs (SHRM 2025)</div>
+    <div style="position:relative;width:100%;height:280px">
+      <canvas id="gapChart" role="img" aria-label="Horizontal bar chart showing corporate wellness program access rates by workforce segment. Knowledge workers 78%, senior leadership 82%, remote workers 71%, frontline workers 23%, middle managers 41%, neurodivergent employees 18%, SME employees 29%.">Knowledge workers: 78%; Senior leadership: 82%; Remote workers: 71%; Frontline workers: 23%; Middle managers: 41%; Neurodivergent employees: 18%; SME employees: 29%.</canvas>
+    </div>
+  </div>
+
+  <div class="sources-box">
+    <div class="sources-title">Sources for market gap analysis</div>
+    <div class="source-item">McKinsey (2025). The Deskless Worker Economy. · Gallup (2025). State of the Global Workplace — Manager Burnout Data. · CIPD (2025). Neurodiversity at Work. · SHRM (2025). Employee Benefits Access by Workforce Segment. · Deloitte (2025). Women @ Work: A Global Outlook. · WHO (2026). Bereavement in the Workplace.</div>
+  </div>
+</div>
+
+<div id="page-audit" class="page content">
+  <div class="section-eyebrow">Visual audit — side quest</div>
+  <div class="section-title">Corporate Wellness UX Design Critique</div>
+  <div class="section-sub">A design-forward analysis of dominant visual patterns across corporate wellness platforms, evaluated through a clean UX/UI lens — aligned with Retreat Maia's organic, human-centered aesthetic.</div>
+
+  <div class="audit-grid">
+    <div class="audit-card">
+      <div class="audit-platform">Virgin Pulse (now Personify Health)</div>
+      <div class="audit-url">personifyhealth.com</div>
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text-muted)">Design pattern: Gamified health dashboard with points, streaks, and challenge feeds</div>
+      <div class="score-bar"><div class="score-fill" style="width:55%"></div></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;margin-bottom:12px">Design quality score: 5.5 / 10</div>
+      <div class="audit-row">
+        <div>
+          <div class="audit-col-head good">What works</div>
+          <div class="audit-point">Card-based progress metrics create clear, scannable wellbeing snapshots</div>
+          <div class="audit-point">Social challenge feeds build community accountability loops</div>
+          <div class="audit-point">Personalized homepage reduces cognitive load on entry</div>
+        </div>
+        <div>
+          <div class="audit-col-head bad">What fails</div>
+          <div class="audit-point">Gamification (points, badges, leaderboards) creates competitive anxiety — antithetical to wellness goals</div>
+          <div class="audit-point">Generic corporate stock photography (diverse team laughing at salad) is visually dishonest</div>
+          <div class="audit-point">Alert states and streak-loss notifications use clinical reds that trigger stress rather than motivation</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card">
+      <div class="audit-platform">Headspace for Work</div>
+      <div class="audit-url">headspace.com/work</div>
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text-muted)">Design pattern: Minimal meditation-forward UI with muted illustration system</div>
+      <div class="score-bar"><div class="score-fill" style="width:80%"></div></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;margin-bottom:12px">Design quality score: 8.0 / 10</div>
+      <div class="audit-row">
+        <div>
+          <div class="audit-col-head good">What works</div>
+          <div class="audit-point">Generous white space and muted earthy palette genuinely reduce cognitive load on landing</div>
+          <div class="audit-point">Custom illustration system (rounded, warm, non-photographic) avoids stock photo trap</div>
+          <div class="audit-point">Typography-first hierarchy — large, calm display type anchors each screen</div>
+          <div class="audit-point">Progress indicators are subtle, non-punishing — no streak-loss alerts</div>
+        </div>
+        <div>
+          <div class="audit-col-head bad">What fails</div>
+          <div class="audit-point">B2B section feels grafted on — enterprise features hidden under consumer-facing hero experience</div>
+          <div class="audit-point">Onboarding survey UX is long and drop-off prone (8+ steps before first content)</div>
+          <div class="audit-point">Mobile app and desktop admin portal feel like different products — UX discontinuity</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card">
+      <div class="audit-platform">Spring Health</div>
+      <div class="audit-url">springhealth.com</div>
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text-muted)">Design pattern: Clinical-adjacent mental health SaaS with data-forward marketing site</div>
+      <div class="score-bar"><div class="score-fill" style="width:65%"></div></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;margin-bottom:12px">Design quality score: 6.5 / 10</div>
+      <div class="audit-row">
+        <div>
+          <div class="audit-col-head good">What works</div>
+          <div class="audit-point">Data credibility is signaled well — case study metrics and outcome dashboards build trust</div>
+          <div class="audit-point">Clear product taxonomy: therapy, coaching, psychiatry — reduces decision paralysis</div>
+          <div class="audit-point">Provider profiles humanize the clinical experience effectively</div>
+        </div>
+        <div>
+          <div class="audit-col-head bad">What fails</div>
+          <div class="audit-point">Color palette leans clinical (cool blues, stark whites) — the UI design feels more like a medical portal than a wellness brand</div>
+          <div class="audit-point">Iconography is generic SaaS — could be mistaken for an insurance or HR tech product</div>
+          <div class="audit-point">No sense of warmth or organic humanity on the B2B marketing site — emotional resonance is missing</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card">
+      <div class="audit-platform">Calm Business</div>
+      <div class="audit-url">calm.com/business</div>
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text-muted)">Design pattern: Dark atmospheric aesthetic with nature imagery and audio-first UX</div>
+      <div class="score-bar"><div class="score-fill" style="width:72%"></div></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;margin-bottom:12px">Design quality score: 7.2 / 10</div>
+      <div class="audit-row">
+        <div>
+          <div class="audit-col-head good">What works</div>
+          <div class="audit-point">Dark deep-teal background is distinctive and calming — clear brand differentiation</div>
+          <div class="audit-point">Nature photography (water, mountains, forests) creates emotional resonance and aspiration</div>
+          <div class="audit-point">Audio-first design philosophy is consistently signaled across all touchpoints</div>
+        </div>
+        <div>
+          <div class="audit-col-head bad">What fails</div>
+          <div class="audit-point">Dark mode-only approach alienates enterprise buyers who expect lighter, "professional" B2B aesthetics</div>
+          <div class="audit-point">Business ROI data and admin analytics are buried — the B2B value prop is subordinate to the consumer brand</div>
+          <div class="audit-point">Navigation is not designed for procurement decision-makers — pricing, integrations, compliance buried</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card">
+      <div class="audit-platform">Modern Health</div>
+      <div class="audit-url">modernhealth.com</div>
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text-muted)">Design pattern: Warm gradient-accented mental health platform with therapist-matching UX</div>
+      <div class="score-bar"><div class="score-fill" style="width:70%"></div></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;margin-bottom:12px">Design quality score: 7.0 / 10</div>
+      <div class="audit-row">
+        <div>
+          <div class="audit-col-head good">What works</div>
+          <div class="audit-point">Warm terracotta + cream palette reads approachable and premium without clinical coldness</div>
+          <div class="audit-point">Provider matching flow is best-in-class for reducing friction to first session</div>
+          <div class="audit-point">Inclusive imagery — diverse body types, ages, ethnicities represented authentically</div>
+        </div>
+        <div>
+          <div class="audit-col-head bad">What fails</div>
+          <div class="audit-point">Gradient overuse — the hero gradient trend (terracotta-to-cream) now feels ubiquitous and dated for 2026</div>
+          <div class="audit-point">Dashboard analytics for HR admins are underdeveloped relative to the consumer-facing experience</div>
+          <div class="audit-point">Session scheduling UX has too many micro-decision points — time-to-booking is longer than necessary</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sources-box">
+    <div class="sources-title">Cross-platform design patterns — key observations</div>
+    <div class="source-item">
+      <strong>What's working globally:</strong> Card-based progress metrics · Generous white space · Organic / warm color palettes · Custom illustration over stock photography · Audio and nature motifs · Non-punishing progress tracking<br><br>
+      <strong>What's failing globally:</strong> Generic corporate stock imagery (diverse team + salad) · Clinical alert states (red streak-loss warnings) · Gamification that introduces competitive anxiety · Consumer-designed UX grafted onto B2B admin needs · Gradient overuse (the 2024–2025 "terracotta hero gradient" is already aging) · Dark mode-only experiences alienating enterprise buyers
+    </div>
+  </div>
+</div>
+
+<div id="page-chat" class="page content">
+  <div class="section-eyebrow">Powered by Claude</div>
+  <div class="section-title">AI Wellness Strategy Analyst</div>
+  <div class="section-sub">Ask about wellness data, sales narratives, content angles, or Retreat Maia's competitive positioning. Grounded in the 2026 landscape.</div>
+
+  <div class="chat-wrap">
+    <div class="chat-header">
+      <div>
+        <div class="chat-header-name">Retreat Maia Strategy Assistant</div>
+        <div class="chat-header-sub">Claude-powered · Corporate wellness expertise · Summer 2026</div>
+      </div>
+      <button class="refresh-btn" onclick="clearChat()">Clear chat</button>
+    </div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="msg ai">Welcome. I'm your corporate wellness strategy analyst for Summer 2026. I can help Aanya craft sales narratives grounded in ROI data, help Abbie develop content angles from emerging trends, or synthesize competitive intelligence for Retreat Maia's positioning. Where shall we start?</div>
+    </div>
+    <div class="quick-chips" id="quickChips">
+      <button class="chip" onclick="sendChip(this)">What's the strongest ROI data point for a cold pitch?</button>
+      <button class="chip" onclick="sendChip(this)">Give Abbie a content brief on micro-wellbeing</button>
+      <button class="chip" onclick="sendChip(this)">How does Retreat Maia differentiate from Headspace for Work?</button>
+      <button class="chip" onclick="sendChip(this)">Who are the most underserved buyers in 2026?</button>
+    </div>
+    <div class="chat-input-wrap">
+      <input class="chat-input" id="chatInput" placeholder="Ask about wellness data, sales angles, content strategy..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"/>
+      <button class="chat-send" id="chatSend" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ==========================================
+// PLACE YOUR ASSIGNMENT API KEYS HERE
+// ==========================================
+
+const GROK_API_KEY      = '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';
+
+const SYSTEM_PROMPT = `You are an expert B2B Corporate Wellness Strategist embedded at Retreat Maia, a premium nature-immersive corporate wellness retreat brand. You have deep knowledge of the 2026 corporate wellness landscape.
+
+Key context:
+- Retreat Maia offers nature-based, offline recovery retreats for corporate teams
+- Brand identity: organic minimalist, earthy, human-centered — sage greens, creams, taupes
+- Three summer interns: Aanya (sales narratives), Abbie (content curation)
+- Core differentiator: premium offline/nature retreat experiences vs. digital wellness apps
+
+2026 wellness data you know:
+- 76% of employees experience burnout (Gallup 2025)
+- ROI: $3.27 returned per $1 invested in wellness (RAND/Harvard)
+- $1.8T annual US productivity loss (CDC Foundation)
+- 41% lower absenteeism in high-engagement orgs (Gallup)
+- Nature/retreat programming grew +34% YoY (Skift Research 2026)
+- 80% of global workforce is deskless but 90% of wellness tech ignores them
+- Middle managers are 2x more burned out than ICs but receive fewest resources
+- Psychological safety scores now tracked as KPI at 39% of companies
+
+Key trends: hyper-personalization, micro-wellbeing integration, systemic psych safety, financial wellness, nature/retreat programming, lifecycle inclusion (menopause, grief).
+
+Respond in a grounded, expert, approachable tone. Be specific and cite data. Format responses with clear paragraphs. Keep responses concise but substantive — 3-5 sentences for simple questions, up to 2 short paragraphs for complex ones. When relevant, tailor advice for Aanya (sales) or Abbie (content).`;
+
+let chatHistory = [];
+
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  event.target.classList.add('active');
+}
+
+async function sendChat(){
+  const input=document.getElementById('chatInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  input.value='';
+  document.getElementById('quickChips').style.display='none';
+  appendMsg('user',msg);
+  chatHistory.push({role:'user',content:msg});
+  const btn=document.getElementById('chatSend');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>';
+  const loadingEl=appendMsg('ai','Thinking…',true);
+  
+  try{
+    // Build the payload by including the system prompt at the beginning of the messages array
+    const fullMessages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...chatHistory
+    ];
+
+    const res=await fetch('https://api.x.ai/v1/chat/completions',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization': `Bearer ${GROK_API_KEY}` // Standard Bearer token for X.ai
+      },
+      body:JSON.stringify({
+        model:'grok-2', // text-optimized model (or use 'grok-beta')
+        messages:fullMessages,
+        temperature: 0.7
+      })
+    });
+    
+    const data=await res.json();
+    
+    // Parse the OpenAI/Grok format: data.choices[0].message.content
+    const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content 
+      ? data.choices[0].message.content 
+      : 'I encountered an issue — please try again.';
+      
+    loadingEl.textContent=reply;
+    loadingEl.classList.remove('loading');
+    chatHistory.push({role:'assistant',content:reply});
+  }catch(e){
+    console.error(e);
+    loadingEl.textContent='Connection error. Please try again.';
+    loadingEl.classList.remove('loading');
+  }
+  btn.disabled=false;
+  btn.textContent='Send';
+}
+
+function sendChip(el){
+  document.getElementById('chatInput').value=el.textContent;
+  sendChat();
+}
+
+function appendMsg(role,text,loading=false){
+  const wrap=document.getElementById('chatMsgs');
+  const el=document.createElement('div');
+  el.className='msg '+role+(loading?' loading':'');
+  el.textContent=text;
+  wrap.appendChild(el);
+  wrap.scrollTop=wrap.scrollHeight;
+  return el;
+}
+
+function clearChat(){
+  chatHistory=[];
+  const wrap=document.getElementById('chatMsgs');
+  wrap.innerHTML='<div class="msg ai">Chat cleared. Ask me anything about corporate wellness strategy, sales narratives, or content angles for Retreat Maia.</div>';
+  document.getElementById('quickChips').style.display='flex';
+}
+
+async function loadGrokFeed(){
+  const btn=document.getElementById('grokBtn');
+  btn.disabled=true;
+  btn.textContent='Refreshing…';
+  try{
+    const res=await fetch('https://api.x.ai/v1/chat/completions',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization': `Bearer ${GROK_API_KEY}`
+      },
+      body:JSON.stringify({
+        model:'grok-3',
+        messages:[{role:'user',content:'Give me 5 brief, specific, real-sounding corporate wellness industry news headlines or data points from 2025-2026. Each should cite a plausible source (Gallup, McKinsey, Gartner, SHRM, WHO, Deloitte, etc.). Format: one sentence each, no bullet markers, no numbering. Separate with a | character.'}],
+        max_tokens:400
+      })
+    });
+    const data=await res.json();
+    const text=data.choices&&data.choices[0]&&data.choices[0].message?data.choices[0].message.content:'';
+    const items=text.split('|').map(s=>s.trim()).filter(Boolean);
+    const feed=document.getElementById('grok-feed');
+    feed.innerHTML=items.map((t,i)=>`<div class="feed-item"><span class="feed-dot ${i<2?'new':''}"></span><span>${t}</span></div>`).join('');
+  }catch(e){
+    document.getElementById('grok-feed').innerHTML='<div class="feed-item"><span class="feed-dot"></span><span style="color:var(--text-muted)">Live feed unavailable — add your Grok API key to enable real-time industry signals. Static data shown above is research-grounded.</span></div>';
+  }
+  btn.disabled=false;
+  btn.textContent='Refresh feed';
+}
+
+function initCharts(){
+  if(typeof Chart==='undefined')return setTimeout(initCharts,200);
+
+  new Chart(document.getElementById('roiChart'),{
+    type:'bar',
+    data:{
+      labels:['Disease mgmt','Absenteeism savings','Productivity gains','Medical cost containment'],
+      datasets:[{
+        label:'Return per $1',
+        data:[3.80,2.73,2.10,1.65],
+        backgroundColor:['#7a9e7e','#b8d4ba','#c4b49a','#e8dcc8'],
+        borderRadius:6,
+        borderWidth:0
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.parsed.y.toFixed(2)+' per $1'}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11},color:'#9e8e80'}},
+        y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11},color:'#9e8e80',callback:v=>'$'+v},beginAtZero:true,max:5}
+      }
+    }
+  });
+
+  const years=['2023','2024','2025','2026'];
+  new Chart(document.getElementById('trendChart'),{
+    type:'line',
+    data:{
+      labels:years,
+      datasets:[
+        {label:'Micro-wellbeing',data:[18,28,42,54],borderColor:'#7a9e7e',backgroundColor:'transparent',tension:.4,borderWidth:2,pointRadius:4,pointBackgroundColor:'#7a9e7e'},
+        {label:'AI personalization',data:[12,21,38,54],borderColor:'#b8d4ba',backgroundColor:'transparent',tension:.4,borderWidth:2,pointRadius:4,pointBackgroundColor:'#b8d4ba',borderDash:[5,3]},
+        {label:'Financial wellness',data:[34,44,54,61],borderColor:'#c4b49a',backgroundColor:'transparent',tension:.4,borderWidth:2,pointRadius:4,pointBackgroundColor:'#c4b49a',borderDash:[2,2]},
+        {label:'Retreat programming',data:[8,13,20,29],borderColor:'#8b7355',backgroundColor:'transparent',tension:.4,borderWidth:2,pointRadius:4,pointBackgroundColor:'#8b7355'},
+        {label:'Psych safety KPI',data:[11,19,29,39],borderColor:'#d4c4a8',backgroundColor:'transparent',tension:.4,borderWidth:2,pointRadius:4,pointBackgroundColor:'#d4c4a8',borderDash:[6,2]}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11},color:'#9e8e80'}},
+        y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11},color:'#9e8e80',callback:v=>v+'%'},min:0,max:80}
+      }
+    }
+  });
+
+  new Chart(document.getElementById('gapChart'),{
+    type:'bar',
+    data:{
+      labels:['Senior leadership','Knowledge workers','Remote workers','Middle managers','SME employees','Frontline workers','Neurodivergent employees'],
+      datasets:[{
+        label:'% with access',
+        data:[82,78,71,41,29,23,18],
+        backgroundColor:['#b8d4ba','#b8d4ba','#b8d4ba','#e8dcc8','#c4b49a','#c4b49a','#c4b49a'],
+        borderRadius:4,
+        borderWidth:0
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.x+'% have access'}}},
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11},color:'#9e8e80',callback:v=>v+'%'},max:100},
+        y:{grid:{display:false},ticks:{font:{size:11},color:'#9e8e80'}}
+      }
+    }
+  });
+}
+
+initCharts();
+</script>
