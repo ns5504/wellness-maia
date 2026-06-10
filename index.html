@@ -230,9 +230,19 @@
 
   <script>
     // ==========================================
-    // PLACE YOUR ASSIGNMENT API KEYS HERE
+    // SECURE API KEY PASSING VIA PROMPT
     // ==========================================
-    const GROK_API_KEY = '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';
+    let GROK_API_KEY = sessionStorage.getItem('grok_key');
+
+    // Prompt user for their key on initial page load if it's missing from memory
+    if (!GROK_API_KEY) {
+      GROK_API_KEY = prompt("Please enter your Grok API Key to activate the strategy pipeline:");
+      if (GROK_API_KEY) {
+        sessionStorage.setItem('grok_key', GROK_API_KEY.trim());
+      } else {
+        alert("An API Key is required for the Maia Strategy Pilot chat to respond.");
+      }
+    }
 
     // Conversation State Trackers
     let chatHistory = [];
@@ -243,6 +253,8 @@
      */
     function appendMsg(sender, text, isLoading = false) {
       const container = document.getElementById('chatContainer');
+      if (!container) return null;
+      
       const el = document.createElement('div');
       el.classList.add('msg', sender);
       
@@ -267,10 +279,23 @@
     }
 
     /**
-     * Executes fully automated network streaming directly via the safe CORS-anywhere proxy channel to Grok
+     * Executes network streaming directly via the safe CORS-anywhere proxy channel to Grok
      */
     async function sendChat(){
+      // Fallback check if they didn't input a key at the load prompt
+      if (!GROK_API_KEY) {
+        GROK_API_KEY = prompt("Please enter your Grok API Key to proceed:");
+        if (GROK_API_KEY) {
+          sessionStorage.setItem('grok_key', GROK_API_KEY.trim());
+        } else {
+          alert("Cannot send message without a valid API key.");
+          return;
+        }
+      }
+
       const input = document.getElementById('chatInput');
+      if (!input) return;
+      
       const msg = input.value.trim();
       if(!msg) return;
       
@@ -283,19 +308,20 @@
       chatHistory.push({ role: 'user', content: msg });
       
       const btn = document.getElementById('chatSend');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>';
+      }
       
       const loadingEl = appendMsg('ai', 'Thinking…', true);
       
       try {
-        // Grok structured array matching specifications for system commands
         const fullMessages = [
           { role: 'system', content: SYSTEM_PROMPT },
           ...chatHistory
         ];
 
-        // Automating backend-free browser setup via public CORS proxy tunnel
+        // Using public CORS proxy tunnel to bypass browser blocks
         const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
         const targetUrl = 'https://api.x.ai/v1/chat/completions';
 
@@ -319,70 +345,79 @@
         
         const data = await res.json();
         
-        // Automated parsing of the returned payload architecture
         const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content 
           ? data.choices[0].message.content 
           : 'I encountered an issue processing the telemetry data stream — please try again.';
           
-        // Auto-replace loading spinner with response block content
-        loadingEl.textContent = reply;
-        loadingEl.classList.remove('loading');
+        if (loadingEl) {
+          loadingEl.textContent = reply;
+          loadingEl.classList.remove('loading');
+        }
         
         chatHistory.push({ role: 'assistant', content: reply });
         
       } catch(e) {
         console.error("Grok Data Pipeline Error Trace:", e);
-        loadingEl.textContent = 'Connection error. Please confirm your API key and proxy access.';
-        loadingEl.classList.remove('loading');
+        if (loadingEl) {
+          loadingEl.textContent = 'Connection error. Please confirm your API key and proxy access.';
+          loadingEl.classList.remove('loading');
+        }
       }
       
-      // Auto-unlock controls
-      btn.disabled = false;
-      btn.textContent = 'Send';
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Send';
+      }
     }
 
     /**
-     * Automated Client Side Telemetry Randomization (Simulates operational refresh patterns)
+     * Automated Client Side Telemetry Randomization (Refreshes metrics panel data)
      */
     function triggerAutomationPipeline() {
       const stamp = document.getElementById('syncTimestamp');
-      stamp.textContent = "Pipeline Synced: Fetching signals...";
+      if (stamp) stamp.textContent = "Pipeline Synced: Fetching signals...";
       
       setTimeout(() => {
-        // Generate pseudo-random numbers to prove data refresh functionality
         const randomConnections = Math.floor(Math.random() * 3) + 12; 
         const randomPackets = (140000 + Math.floor(Math.random() * 9000)).toLocaleString();
         const randomArr = (1.2 + (Math.random() * 0.1)).toFixed(2);
         
-        document.getElementById('metric-connections').textContent = `${randomConnections} / 15`;
-        document.getElementById('metric-packets').textContent = randomPackets;
-        document.getElementById('metric-arr').textContent = `$${randomArr}M`;
+        const connEl = document.getElementById('metric-connections');
+        const packEl = document.getElementById('metric-packets');
+        const arrEl = document.getElementById('metric-arr');
         
-        // Simulating immediate execution updates within dynamic table matrices
+        if (connEl) connEl.textContent = `${randomConnections} / 15`;
+        if (packEl) packEl.textContent = randomPackets;
+        if (arrEl) arrEl.textContent = `$${randomArr}M`;
+        
         const tableBody = document.getElementById('pipelineRows');
-        tableBody.innerHTML = `
-          <tr>
-            <td>Stripe Connect Core API</td>
-            <td><span class="status-tag status-active">Operational</span></td>
-            <td>${(40000 + Math.floor(Math.random() * 3000)).toLocaleString()} transactions</td>
-            <td>${Math.floor(Math.random() * 6) + 10}ms avg execution</td>
-          </tr>
-          <tr>
-            <td>Luxury Retail Trend Aggregator</td>
-            <td><span class="status-tag status-active">Operational</span></td>
-            <td>${(85000 + Math.floor(Math.random() * 5000)).toLocaleString()} vectors</td>
-            <td>${Math.floor(Math.random() * 20) + 100}ms sync block</td>
-          </tr>
-          <tr>
-            <td>B2B Corporate Platform Core</td>
-            <td><span class="status-tag status-active">Operational</span></td>
-            <td>${(11000 + Math.floor(Math.random() * 2000)).toLocaleString()} telemetry points</td>
-            <td>${Math.floor(Math.random() * 40) + 60}ms sync block</td>
-          </tr>
-        `;
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr>
+              <td>Stripe Connect Core API</td>
+              <td><span class="status-tag status-active">Operational</span></td>
+              <td>${(40000 + Math.floor(Math.random() * 3000)).toLocaleString()} transactions</td>
+              <td>${Math.floor(Math.random() * 6) + 10}ms avg execution</td>
+            </tr>
+            <tr>
+              <td>Luxury Retail Trend Aggregator</td>
+              <td><span class="status-tag status-active">Operational</span></td>
+              <td>${(85000 + Math.floor(Math.random() * 5000)).toLocaleString()} vectors</td>
+              <td>${Math.floor(Math.random() * 20) + 100}ms sync block</td>
+            </tr>
+            <tr>
+              <td>B2B Corporate Platform Core</td>
+              <td><span class="status-tag status-active">Operational</span></td>
+              <td>${(11000 + Math.floor(Math.random() * 2000)).toLocaleString()} telemetry points</td>
+              <td>${Math.floor(Math.random() * 40) + 60}ms sync block</td>
+            </tr>
+          `;
+        }
         
-        const now = new Date();
-        stamp.textContent = `Pipeline Synced: ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+        if (stamp) {
+          const now = new Date();
+          stamp.textContent = `Pipeline Synced: ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+        }
       }, 900);
     }
   </script>
